@@ -1,199 +1,418 @@
- *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+/* ─── Reset & Tokens ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 48px 16px;
-      color: #1a1a1a;
-    }
+:root {
+  --bg:        #f0ede8;
+  --surface:   #fffef9;
+  --surface2:  #f5f2ec;
+  --border:    #e0dbd2;
+  --text:      #1c1917;
+  --text2:     #78716c;
+  --accent:    #c2410c;
+  --accent-h:  #9a3412;
+  --done-op:   0.45;
+  --radius:    12px;
+  --shadow:    0 2px 12px rgba(0,0,0,.07);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+  --font-head: 'DM Serif Display', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --trans:     0.18s ease;
+}
 
-    .container {
-      width: 100%;
-      max-width: 520px;
-    }
+[data-theme="dark"] {
+  --bg:       #141210;
+  --surface:  #1e1b17;
+  --surface2: #262219;
+  --border:   #2e2a24;
+  --text:     #f5f0e8;
+  --text2:    #8a8278;
+  --accent:   #fb923c;
+  --accent-h: #f97316;
+  --shadow:   0 2px 12px rgba(0,0,0,.4);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.5);
+  --done-op:  0.35;
+}
 
-    h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 24px;
-      color: #111;
-    }
+/* ─── Base ───────────────────────────────────────────────────── */
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px 80px;
+  transition: background var(--trans), color var(--trans);
+}
 
-    .input-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
+#confetti-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
 
-    .input-row input {
-      flex: 1;
-      padding: 12px 16px;
-      font-size: 1rem;
-      border: 1.5px solid #ddd;
-      border-radius: 8px;
-      background: #fff;
-      outline: none;
-      transition: border-color 0.15s;
-    }
+.container {
+  width: 100%;
+  max-width: 560px;
+  animation: fadeUp .4s ease both;
+}
 
-    .input-row input:focus {
-      border-color: #6366f1;
-    }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-    .input-row button {
-      padding: 12px 20px;
-      font-size: 1rem;
-      font-weight: 600;
-      background: #6366f1;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.15s;
-    }
+/* ─── Header ─────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
 
-    .input-row button:hover {
-      background: #4f46e5;
-    }
+h1 {
+  font-family: var(--font-head);
+  font-size: 2.6rem;
+  font-weight: 400;
+  color: var(--text);
+  letter-spacing: -.02em;
+  line-height: 1;
+  margin-bottom: 10px;
+}
 
-    .filters {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 16px;
-    }
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-    .filter-btn {
-      padding: 6px 14px;
-      font-size: 0.875rem;
-      border: 1.5px solid #ddd;
-      border-radius: 20px;
-      background: transparent;
-      cursor: pointer;
-      color: #555;
-      transition: all 0.15s;
-    }
+.progress-bar {
+  width: 160px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
 
-    .filter-btn.active {
-      background: #6366f1;
-      border-color: #6366f1;
-      color: #fff;
-    }
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  width: 0%;
+  transition: width .5s cubic-bezier(.4,0,.2,1);
+}
 
-    .task-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+.progress-label {
+  font-size: 0.78rem;
+  color: var(--text2);
+  white-space: nowrap;
+}
 
-    .task-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: #fff;
-      border: 1.5px solid #e5e5e5;
-      border-radius: 10px;
-      padding: 14px 16px;
-      transition: opacity 0.15s;
-    }
+.theme-toggle {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  width: 42px; height: 42px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--trans);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.theme-toggle:hover { border-color: var(--accent); transform: rotate(20deg); }
 
-    .task-item.done {
-      opacity: 0.55;
-    }
+/* ─── Add Card ───────────────────────────────────────────────── */
+.add-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  transition: box-shadow var(--trans);
+}
+.add-card:focus-within { box-shadow: var(--shadow-lg); border-color: var(--accent); }
 
-    .task-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-      background: transparent;
-      cursor: pointer;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.15s;
-    }
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
 
-    .task-check.checked {
-      background: #6366f1;
-      border-color: #6366f1;
-    }
+.input-row input {
+  flex: 1;
+  padding: 11px 14px;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--trans), background var(--trans);
+}
+.input-row input:focus { border-color: var(--accent); background: var(--surface); }
+.input-row input::placeholder { color: var(--text2); }
 
-    .task-check.checked::after {
-      content: '';
-      display: block;
-      width: 5px;
-      height: 9px;
-      border: 2px solid #fff;
-      border-top: none;
-      border-left: none;
-      transform: rotate(45deg) translateY(-1px);
-    }
+.input-row button {
+  padding: 11px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--trans), transform .1s;
+}
+.input-row button:hover  { background: var(--accent-h); }
+.input-row button:active { transform: scale(.97); }
 
-    .task-text {
-      flex: 1;
-      font-size: 1rem;
-      line-height: 1.4;
-      word-break: break-word;
-    }
+.meta-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-    .task-item.done .task-text {
-      text-decoration: line-through;
-      color: #999;
-    }
+.meta-select {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--trans);
+}
+.meta-select:focus { border-color: var(--accent); }
 
-    .delete-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #ccc;
-      font-size: 1.1rem;
-      line-height: 1;
-      padding: 2px 4px;
-      border-radius: 4px;
-      transition: color 0.15s;
-      flex-shrink: 0;
-    }
+/* ─── Filter Bar ─────────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
 
-    .delete-btn:hover {
-      color: #ef4444;
-    }
+.filter-group { display: flex; gap: 4px; }
 
-    .empty-state {
-      text-align: center;
-      color: #aaa;
-      font-size: 0.95rem;
-      padding: 40px 0;
-    }
+.filter-btn {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all var(--trans);
+}
+.filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filter-btn:hover:not(.active) { border-color: var(--accent); color: var(--text); }
 
-    .footer {
-      margin-top: 16px;
-      font-size: 0.85rem;
-      color: #aaa;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.tag-filters { display: flex; flex-wrap: wrap; gap: 4px; }
 
-    .clear-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #aaa;
-      font-size: 0.85rem;
-      padding: 0;
-      transition: color 0.15s;
-    }
+.tag-chip {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-family: var(--font-body);
+  border: 1.5px dashed var(--border);
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all var(--trans);
+}
+.tag-chip.active { border-style: solid; border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 
-    .clear-btn:hover {
-      color: #ef4444;
-    }
+/* ─── Task List ──────────────────────────────────────────────── */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* ─── Task Item ──────────────────────────────────────────────── */
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 13px 14px;
+  cursor: grab;
+  position: relative;
+  transition: opacity var(--trans), background var(--trans), border-color var(--trans), transform .15s, box-shadow .15s;
+  animation: slideIn .22s ease both;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.task-item:hover { box-shadow: var(--shadow); border-color: var(--border); }
+.task-item.dragging { opacity: .4; cursor: grabbing; transform: scale(.99); }
+.task-item.drag-over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+
+.task-item.done { opacity: var(--done-op); }
+
+/* Priority stripe */
+.task-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+  transition: background var(--trans);
+}
+.task-item[data-priority="high"]::before   { background: #ef4444; }
+.task-item[data-priority="medium"]::before { background: #f59e0b; }
+.task-item[data-priority="low"]::before    { background: #22c55e; }
+
+/* ─── Check Button ───────────────────────────────────────────── */
+.task-check {
+  width: 21px; height: 21px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--trans);
+}
+.task-check:hover { border-color: var(--accent); }
+.task-check.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  animation: pop .25s cubic-bezier(.34,1.56,.64,1);
+}
+.task-check.checked::after {
+  content: '';
+  display: block;
+  width: 5px; height: 9px;
+  border: 2px solid #fff;
+  border-top: none; border-left: none;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+@keyframes pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* ─── Task Body ──────────────────────────────────────────────── */
+.task-body { flex: 1; min-width: 0; }
+
+.task-text {
+  font-size: 0.97rem;
+  line-height: 1.4;
+  word-break: break-word;
+  color: var(--text);
+  transition: color var(--trans);
+}
+.task-item.done .task-text { text-decoration: line-through; color: var(--text2); }
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+  align-items: center;
+}
+
+.badge {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-priority-high   { background: #fee2e2; color: #b91c1c; }
+.badge-priority-medium { background: #fef3c7; color: #92400e; }
+.badge-priority-low    { background: #dcfce7; color: #166534; }
+
+[data-theme="dark"] .badge-priority-high   { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .badge-priority-medium { background: #451a03; color: #fcd34d; }
+[data-theme="dark"] .badge-priority-low    { background: #052e16; color: #86efac; }
+
+.badge-due { background: var(--surface2); color: var(--text2); }
+.badge-due.overdue { background: #fee2e2; color: #b91c1c; }
+[data-theme="dark"] .badge-due.overdue { background: #450a0a; color: #fca5a5; }
+
+.badge-tag { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+
+/* ─── Delete Btn ─────────────────────────────────────────────── */
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--border);
+  font-size: 1rem;
+  line-height: 1;
+  padding: 4px 5px;
+  border-radius: 6px;
+  transition: color var(--trans), background var(--trans);
+  flex-shrink: 0;
+}
+.delete-btn:hover { color: #ef4444; background: #fee2e2; }
+[data-theme="dark"] .delete-btn:hover { background: #450a0a; }
+
+/* ─── Empty State ────────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  color: var(--text2);
+  font-size: 0.9rem;
+  padding: 48px 0;
+  animation: fadeUp .3s ease both;
+}
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+.footer {
+  margin-top: 14px;
+  font-size: 0.83rem;
+  color: var(--text2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 0.83rem;
+  font-family: var(--font-body);
+  padding: 0;
+  transition: color var(--trans);
+}
+.clear-btn:hover { color: #ef4444; }
+
+/* ─── Drag handle hint ───────────────────────────────────────── */
+.drag-handle {
+  color: var(--border);
+  font-size: 0.95rem;
+  cursor: grab;
+  flex-shrink: 0;
+  user-select: none;
+  padding: 0 2px;
+}
+.task-item:hover .drag-handle { color: var(--text2); }

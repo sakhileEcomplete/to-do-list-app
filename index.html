@@ -1,41 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>To-Do List</title>
-
-  <!-- Replace the empty <style></style> with this -->
-<link rel="stylesheet" href="style.css" />
-
-<!-- Replace the script tag with this -->
-<script src="script.js"></script>
-
+  <title>Tasks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <canvas id="confetti-canvas"></canvas>
+
   <div class="container">
-    <h1>My Tasks</h1>
+    <header class="app-header">
+      <div class="header-left">
+        <h1>My Tasks</h1>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <span class="progress-label" id="progress-label">0 / 0 done</span>
+        </div>
+      </div>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode">🌙</button>
+    </header>
 
-    <div class="input-row">
-      <input type="text" id="task-input" placeholder="Add a new task..." maxlength="200" />
-      <button id="add-btn">Add</button>
+    <!-- Add Task Form -->
+    <div class="add-card" id="add-card">
+      <div class="input-row">
+        <input type="text" id="task-input" placeholder="What needs doing?" maxlength="200" autocomplete="off" />
+        <button id="add-btn">Add</button>
+      </div>
+      <div class="meta-row">
+        <select id="priority-select" class="meta-select">
+          <option value="none">⬜ No priority</option>
+          <option value="low">🟢 Low</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="high">🔴 High</option>
+        </select>
+        <input type="date" id="due-input" class="meta-select" title="Due date" />
+        <input type="text" id="tag-input" class="meta-select" placeholder="# tag" maxlength="20" />
+      </div>
     </div>
 
-    <div class="filters">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="active">Active</button>
-      <button class="filter-btn" data-filter="done">Completed</button>
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="filter-group" id="status-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="active">Active</button>
+        <button class="filter-btn" data-filter="done">Done</button>
+      </div>
+      <div class="tag-filters" id="tag-filters"></div>
     </div>
 
+    <!-- Task List -->
     <ul class="task-list" id="task-list"></ul>
 
+    <!-- Footer -->
     <div class="footer" id="footer" style="display:none;">
       <span id="count-label"></span>
       <button class="clear-btn" id="clear-btn">Clear completed</button>
     </div>
   </div>
 
-  <script src = "script.js">
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
